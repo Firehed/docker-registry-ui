@@ -18,6 +18,11 @@ class Layer extends Component<void, LayerProp, LayerState> {
     size: 0,
   };
 
+  constructor(props: LayerProp) {
+    super(props);
+    this.fetchBlobInfo(this.props.blobSum);
+  }
+
   componentWillReceiveProps() {
     console.log('cwp');
     this.fetchBlobInfo(this.props.blobSum)
@@ -31,9 +36,10 @@ class Layer extends Component<void, LayerProp, LayerState> {
     let auth = btoa(this.props.user + ':' + this.props.password)
     fetch('https://' + domain + '/v2/' + this.props.name + '/blobs/' + layer, {
       method: 'HEAD',
-      headers: {
-        'Authorization': 'Basic ' + auth,
-      },
+      credentials: 'include',
+//      headers: {
+//        'Authorization': 'Basic ' + auth,
+//      },
     })
       .then(response => this.setState({
         loading: false,

@@ -10,6 +10,7 @@ import type { ContextRouter } from 'react-router';
 
 import {
   BrowserRouter as Router,
+  Redirect,
   Route
 } from 'react-router-dom';
 
@@ -23,6 +24,7 @@ type Props = {
 type State = {
   repositories: string[],
 };
+
 class App extends Component {
 
   state = {
@@ -40,9 +42,10 @@ class App extends Component {
 
     let auth = btoa(this.props.user + ':' + this.props.password)
     fetch('https://' + domain + '/v2/_catalog', {
-      headers: {
-        'Authorization': 'Basic ' + auth,
-      },
+      credentials: 'include',
+//      headers: {
+//        'Authorization': 'Basic ' + auth,
+//      },
     })
       .then(response => response.json())
       .then(json => this.setState({ repositories: json.repositories }))
@@ -53,9 +56,26 @@ class App extends Component {
       <Router>
       <div className="App">
         <RepoList repos={this.state.repositories} />
+        <Route path="/" render={() => (<Redirect to="/ui" />)} />
         <Route
           path="/ui/:repo/:name"
-          render={(props: ContextRouter) => <Repo name={props.match.params.repo+'/'+props.match.params.name} {...this.props} />} />
+          render={(props: ContextRouter) => (
+            <Repo
+              name={props.match.params.repo+'/'+props.match.params.name}
+              {...this.props}
+             />
+          )}
+        />
+        <Route
+          path="/ui/:repo/:name/tag/:tag"
+          render={(props: ContextRouter) => (
+            <Repo
+              name={props.match.params.repo+'/'+props.match.params.name}
+              tag={props.match.params.tag}
+              {...this.props}
+             />
+          )}
+        />
       </div>
       </Router>
     );

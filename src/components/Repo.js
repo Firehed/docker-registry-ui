@@ -1,31 +1,53 @@
 // @flow
 import React, { Component } from 'react';
 import Layer from './Layer';
+import Taglist from './Taglist';
 
 type Props = {
   domain: string,
   user: string,
   password: string,
   name: string,
+  tag?: string,
 };
 
 type State = {
   layers: string[],
   loading: bool,
+  tags: string[],
 };
 
 class Repo extends Component<void, Props, State> {
   state = {
     layers: [],
     loading: false,
+    tags: [],
   };
 
+  constructor(props: Props) {
+    super(props)
+    this.componentWillReceiveProps()
+  }
   componentWillReceiveProps() {
-    this.fetchManifests('latest');
+    this.fetchTags()
+  //  this.fetchManifests('latest');
   }
 
   unique(value, index, self) {
     return self.indexOf(value) === index;
+  }
+
+  fetchTags() {
+    let domain = this.props.domain;
+    this.setState({ loading: true });
+    fetch('https://' + domain + '/v2/' + this.props.name + '/tags/list', {
+      credentials: 'include',
+    })
+      .then(response => response.json())
+      .then(json => this.setState({
+        loading: false,
+        tags: json.tags,
+      }))
   }
 
   fetchManifests(tag: string) {
@@ -34,9 +56,10 @@ class Repo extends Component<void, Props, State> {
 
     let auth = btoa(this.props.user + ':' + this.props.password)
     fetch('https://' + domain + '/v2/' + this.props.name + '/manifests/' + tag, {
-      headers: {
-        'Authorization': 'Basic ' + auth,
-      },
+      credentials: 'include',
+//      headers: {
+//        'Authorization': 'Basic ' + auth,
+//      },
     })
       .then(response => response.json())
       .then(json => json.fsLayers.map(layer => layer.blobSum))
@@ -48,6 +71,7 @@ class Repo extends Component<void, Props, State> {
     if (this.state.loading) {
       return (<span>Loading...</span>);
     }
+    return (<Taglist tags={this.state.tags} />)
     let layers = this
       .state
       .layers
