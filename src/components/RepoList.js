@@ -7,11 +7,12 @@ type Props = {
 };
 
 class RepoList extends Component<void, Props, void> {
+  renderRepo = (repo: string) => {
+    return <li key={repo}><Link to={"/ui/"+repo}>{repo}</Link></li>
+  }
   render() {
-    let repoList = this.props.repos
-      .map(repo => <li key={repo}><Link to={"/ui/"+repo}>{repo}</Link></li>);
     return (
-      <ul>{repoList}</ul>
+      <ul>{this.props.repos.map(this.renderRepo)}</ul>
     );
   }
 }

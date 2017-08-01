@@ -39,8 +39,12 @@ export default class Layer extends Component<void, Props, void> {
   }
 
   render() {
+    const prefix = 'sha256:'
+    const hashLength = 12
+    const shortHash = this.props.blobSum.slice(prefix.length).slice(0, hashLength)
+
     return (
-      <div>{this.props.blobSum}: {this.sizeString(this.props.size)}</div>
+      <div>{shortHash}: {this.sizeString(this.props.size)}</div>
     );
   }
 }
