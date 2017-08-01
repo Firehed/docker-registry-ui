@@ -1,6 +1,5 @@
 // @flow
 import React, { Component } from 'react';
-import Layer from './Layer';
 import { Link, Route } from 'react-router-dom';
 
 type Props = {

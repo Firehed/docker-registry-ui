@@ -1,60 +1,46 @@
 // @flow
 import React, { Component } from 'react';
 
-type LayerProp = {
-  domain: string,
-  user: string,
-  password: string,
-  name: string,
+type Props = {
   blobSum: string,
-};
-type LayerState = {
-  loading: bool,
   size: number,
 };
-class Layer extends Component<void, LayerProp, LayerState> {
-  state = {
-    loading: false,
-    size: 0,
-  };
 
-  constructor(props: LayerProp) {
-    super(props);
-    this.fetchBlobInfo(this.props.blobSum);
-  }
+const suffixes = ['b', 'k', 'M', 'G']
 
-  componentWillReceiveProps() {
-    console.log('cwp');
-    this.fetchBlobInfo(this.props.blobSum)
-  }
+// Local cheat so Intl is recognized
+// See https://github.com/facebook/flow/issues/2801#issuecomment-305002446
+declare class Intl$NumberFormat {
+  constructor(locales: string | Array<string>, options?: Object): void;
+  format(number: number): string;
+}
+declare type IntlType = {
+  NumberFormat: Class<Intl$NumberFormat>,
+}
+declare var Intl: IntlType;
 
-  fetchBlobInfo(layer: string) {
-    this.setState({ loading: true });
 
-    let domain = this.props.domain;
+export default class Layer extends Component<void, Props, void> {
 
-    let auth = btoa(this.props.user + ':' + this.props.password)
-    fetch('https://' + domain + '/v2/' + this.props.name + '/blobs/' + layer, {
-      method: 'HEAD',
-      credentials: 'include',
-//      headers: {
-//        'Authorization': 'Basic ' + auth,
-//      },
+
+  sizeString(size: number) {
+    let suffixIndex = 0
+    while (size > 1024) {
+      suffixIndex++
+      size = size / 1024
+    }
+
+    let format = new Intl.NumberFormat('en-US', {
+      maximumFractionDigits: 2,
+      style: 'decimal',
     })
-      .then(response => this.setState({
-        loading: false,
-        size: response.headers.get('content-length') || 0,
-      }))
+
+    return format.format(size) + suffixes[suffixIndex]
   }
 
   render() {
-    if (this.state.loading) {
-      return (<span>Loading...</span>);
-    }
     return (
-      <div>{this.props.blobSum}: {this.state.size}</div>
+      <div>{this.props.blobSum}: {this.sizeString(this.props.size)}</div>
     );
   }
 }
-
-export default Layer;
